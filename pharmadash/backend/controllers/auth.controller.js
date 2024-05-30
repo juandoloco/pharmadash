@@ -1,44 +1,18 @@
-const db = require("../models");
-const User = db.usuarios;
-const Role = db.roles;
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const pool = require('../config/db.config.js');
 
-exports.signin = async (req, res) => {
-  try {
-    const user = await User.findOne({
-      where: {
-        usuario: req.body.usuario
-      }
-    });
+//funcion para validar los datos del login
+const getPro = async (req, res) => {
+    const { user} = req.body;
 
-    if (!user) {
-      return res.status(404).send({ message: "User Not found." });
+    try {
+        const response = await pool.query('SELECT * FROM usuario');
+        res.status(200).json(response.rows);
+    } catch (error) {
+        console.error("Error en la consulta a la base de datos:", error);
+        res.status(500).json({ error: "Error en la consulta a la base de datos" });
     }
+};
 
-    const passwordIsValid = bcrypt.compareSync(
-      req.body.contrasenia,
-      user.contrasenia
-    );
-
-    if (!passwordIsValid) {
-      return res.status(401).send({
-        accessToken: null,
-        message: "Invalid Password!"
-      });
-    }
-
-    const token = jwt.sign({ id: user.id_usuario }, "pharmadash-secret-key", {
-      expiresIn: 86400 // 24 hours
-    });
-
-    res.status(200).send({
-      id: user.id_usuario,
-      usuario: user.usuario,
-      roles: ["admin"], // Hardcoded for this example
-      accessToken: token
-    });
-  } catch (error) {
-    res.status(500).send({ message: error.message });
-  }
+module.exports = {
+    getPro
 };

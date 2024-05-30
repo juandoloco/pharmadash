@@ -1,4 +1,8 @@
-module.exports = app => {
-  const auth = require("../controllers/auth.controller");
-  app.post("/api/auth/signin", auth.signin);
-};
+const { Router } = require('express');
+const routerVenta = Router();
+
+const { getPro } = require('../controllers/auth.controller.js');
+
+routerVenta.get('/getPro',    getPro  );
+
+module.exports = routerVenta;
